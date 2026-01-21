@@ -15,13 +15,12 @@ export const startWorker = async () => {
     const toneGuideline = TonePrompts[selectedTone] || TonePrompts.educational;
 
     const prompt = `
-      =======================================================
+      Generate a detailed article based on the following specifications:
       TASK SPECIFICATION:
       Topic: ${data.topic}
       Keywords: ${data.keywords?.join(', ') || 'None'}
       Category: ${data.category || 'General'}
       ${toneGuideline}
-      =======================================================
           `.trim();
 
     try {
