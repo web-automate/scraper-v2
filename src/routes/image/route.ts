@@ -1,10 +1,11 @@
 import { Router, Request, Response } from 'express';
 import { rabbitMQService } from '../../service/rabbitmq.service';
 import { ImageRequest, imageRequestSchema } from '../../lib/schema/image';
+import { rateLimit } from '../../middleware/rate-limit';
 
 export const imageRouter = Router();
 
-imageRouter.post('/generate', async (req: Request, res: Response): Promise<any> => {
+imageRouter.post('/generate', rateLimit({ windowMs: 60_000, max: 3 }), async (req: Request, res: Response): Promise<any> => {
   const validation = imageRequestSchema.safeParse(req.body);
 
   if (!validation.success) {

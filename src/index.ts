@@ -10,6 +10,7 @@ import { startWorker } from './worker/scraper.worker';
 import dotenv from 'dotenv';
 import { env } from './config/env';
 import { imageRouter } from './routes/image/route';
+import { rateLimit } from './middleware/rate-limit';
 
 dotenv.config();
 
@@ -40,7 +41,7 @@ if (swaggerFile) {
   console.log('⚠️ Swagger documentation file not found. Swagger UI will not be available.');
 }
 
-app.get('/health', (req: Request, res: Response) => {
+app.get('/health', rateLimit({ windowMs: 60_000, max: 5 }), (req: Request, res: Response) => {
   res.status(200).json({ 
     success: true, 
     message: 'System Healthy', 
