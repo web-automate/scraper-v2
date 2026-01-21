@@ -44,7 +44,7 @@ export class RabbitMQService {
     
     const buffer = Buffer.from(JSON.stringify(data));
     this.channel.sendToQueue(QUEUE_NAME, buffer, { persistent: true });
-    console.log(`[Producer] Job sent to queue`);
+    console.log(`[Producer] Job sent to queue: ${data.type || 'UNKNOWN_TYPE'}`);
   }
 
   async consume(workerHandler: (data: any) => Promise<void>) {

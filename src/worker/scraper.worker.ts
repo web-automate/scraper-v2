@@ -1,62 +1,119 @@
 import axios from 'axios';
 import { rabbitMQService } from '../service/rabbitmq.service';
-import { ArticleRequest } from '../lib/schema';
 import { AiScraperService } from '../service/scraper.service';
 import { TonePrompts, Tone } from '../lib/tone'; 
+import { ArticleRequest } from '../lib/schema';
+import { ImageRequest } from '../lib/schema/image';
+import { ToneImage, ToneImagePrompts } from '../lib/tone/image';
+import { getAspectRatioInstruction } from '../lib/enum/aspect-ratio';
 
 const AIService = new AiScraperService();
 
+type JobPayload = (ArticleRequest | ImageRequest) & { type?: 'IMAGE_GENERATION' | 'ARTICLE_GENERATION' };
+
 export const startWorker = async () => {
-  console.log('Starting Worker...');
+  console.log('👷 Starting Worker...');
 
-  await rabbitMQService.consume(async (data: ArticleRequest) => {
+  await rabbitMQService.consume(async (data: JobPayload) => {
     
-    const selectedTone = (data.tone as Tone) || 'educational';
-    const toneGuideline = TonePrompts[selectedTone] || TonePrompts.educational;
+    const jobType = data.type || 'ARTICLE_GENERATION';
 
-    const prompt = `
-      Generate a detailed article based on the following specifications:
-      TASK SPECIFICATION:
-      Topic: ${data.topic}
-      Keywords: ${data.keywords?.join(', ') || 'None'}
-      Category: ${data.category || 'General'}
-      ${toneGuideline}
-          `.trim();
+    console.log(`[Worker] Processing Job Type: ${jobType}`);
 
     try {
-      console.log(`[Worker] Processing topic: "${data.topic}" with tone: "${selectedTone}"`);
+      if (jobType === 'IMAGE_GENERATION') {
+        const imgData = data as ImageRequest;
+        console.log(`[Worker] Generating Image for prompt: "${imgData.prompt}"`);
 
-      const result = await AIService.generateContent(prompt);
+        const selectedTone = (imgData.tone as ToneImage) || 'artSchool';
+        const toneGuideline = ToneImagePrompts[selectedTone] || ToneImagePrompts.artSchool;
 
-      if (data.webhookUrl) {
-        console.log(`Sending result to webhook: ${data.webhookUrl}`);
-        try {
-          await axios.post(data.webhookUrl, {
-            topic: data.topic,
+        const prompt = `
+        Generative Image Prompt Structure
+        ---------------------------------
+
+        [SUBJECT / CONTENT]
+        ${imgData.prompt.trim()}
+
+        [ARTISTIC STYLE & TONE]
+        ${toneGuideline.trim()}
+
+        [COMPOSITION & DIMENSIONS]
+        Target Aspect Ratio: ${imgData.aspectRatio}
+        Framing Guideline: ${getAspectRatioInstruction(imgData.aspectRatio)}
+        Ensure the subject is framed correctly according to this ratio (e.g., don't crop heads in vertical, fill sides in horizontal).
+
+        [OUTPUT CONSTRAINTS]
+        CRITICAL: Generate exactly ONE single image frame. Do not create a grid, collage, split-screen, or multiple panels. The final output must be a singular, cohesive composition.
+
+        [SYNTHESIS INSTRUCTIONS]
+        Combine the subject content with the artistic tone and composition guidelines seamlessly.
+        `.trim();
+
+        const imagePath = await AIService.generateImage(prompt);
+
+        if (imgData.webhookUrl) {
+          await sendWebhook(imgData.webhookUrl, {
+            type: 'IMAGE',
+            prompt: imgData.prompt,
+            imagePath: imagePath, 
+            status: 'completed'
+          });
+        } else {
+          console.log(`[Worker] Image generated at: ${imagePath}`);
+        }
+
+      } else {
+        const artData = data as ArticleRequest;
+        const selectedTone = (artData.tone as Tone) || 'educational';
+        const toneGuideline = TonePrompts[selectedTone] || TonePrompts.educational;
+
+        const prompt = `
+          Generate a detailed article based on the following specifications:
+          TASK SPECIFICATION:
+          Topic: ${artData.topic}
+          Keywords: ${artData.keywords?.join(', ') || 'None'}
+          Category: ${artData.category || 'General'}
+          ${toneGuideline}
+        `.trim();
+
+        console.log(`[Worker] Generating Article: "${artData.topic}" (${selectedTone})`);
+
+        const result = await AIService.generateContent(prompt);
+
+        if (artData.webhookUrl) {
+          await sendWebhook(artData.webhookUrl, {
+            type: 'ARTICLE',
+            topic: artData.topic,
             content: result,
             status: 'completed'
           });
-        } catch (webhookError) {
-          console.error('Webhook failed:', webhookError);
+        } else {
+          console.log('Snippet:', result.substring(0, 50) + '...');
         }
-      } else {
-        console.log('No webhook URL provided. Result generated but nowhere to send.');
-        console.log('Snippet:', result.substring(0, 50) + '...');
       }
 
     } catch (error: any) {
-      console.error('Worker processing failed:', error.message);
+      console.error(`[Worker] Processing failed: ${error.message}`);
       
       if (data.webhookUrl) {
-        try {
-          await axios.post(data.webhookUrl, {
-            topic: data.topic,
-            error: error.message,
-            status: 'failed'
-          });
-        } catch (_) {}
+        await sendWebhook(data.webhookUrl, {
+          type: jobType === 'IMAGE_GENERATION' ? 'IMAGE' : 'ARTICLE',
+          error: error.message,
+          status: 'failed'
+        });
       }
-      throw error; 
+      throw error;
     }
   });
 };
+
+async function sendWebhook(url: string, payload: any) {
+  console.log(`[Webhook] Sending result to: ${url}`);
+  try {
+    await axios.post(url, payload);
+    console.log('[Webhook] Sent successfully.');
+  } catch (webhookError) {
+    console.error('[Webhook] Failed to send:', webhookError);
+  }
+}

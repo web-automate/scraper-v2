@@ -9,6 +9,7 @@ import { rabbitMQService } from './service/rabbitmq.service';
 import { startWorker } from './worker/scraper.worker';
 import dotenv from 'dotenv';
 import { env } from './config/env';
+import { imageRouter } from './routes/image/route';
 
 dotenv.config();
 
@@ -48,6 +49,7 @@ app.get('/health', (req: Request, res: Response) => {
 });
 
 app.use('/api/article', articleRouter);
+app.use('/api/image', imageRouter);
 
 app.use((req: Request, res: Response) => {
   res.status(404).json({ success: false, error: 'Endpoint not found' });

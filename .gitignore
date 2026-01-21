@@ -10,3 +10,4 @@ data/sessions/session-gemini.bin
 data/sessions/session-gemini.json
 ./session-chatgpt.json
 ./session-gemini.json
+content/images/*.png

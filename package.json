@@ -27,6 +27,7 @@
     "swagger-autogen": "^2.23.7",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
+    "uuid": "^13.0.0",
     "v8": "^0.1.0",
     "zod": "^4.3.5"
   },
@@ -37,6 +38,7 @@
     "@types/node": "^25.0.9",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
+    "@types/uuid": "^11.0.0",
     "@types/ws": "^8.18.1",
     "dotenv-cli": "^11.0.0",
     "nodemon": "^3.1.11",

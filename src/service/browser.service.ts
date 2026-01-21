@@ -11,6 +11,7 @@ const CHROME_PATH = process.platform === 'win32'
   : '/usr/bin/google-chrome';
 
 const USER_DATA_DIR = path.join(process.cwd(), 'chrome_data_prod');
+export const TEMP_DOWNLOAD_DIR = path.join(process.cwd(), 'temp_downloads');
 export const DEBUG_PORT = env.DEBUG_PORT || 9222;
 
 export class BrowserService {
@@ -31,6 +32,13 @@ export class BrowserService {
           fs.writeFileSync(preferencesPath, JSON.stringify(json, null, 2));
         }
       } catch (error) { }
+    }
+  }
+
+  private ensureDownloadDir() {
+    if (!fs.existsSync(TEMP_DOWNLOAD_DIR)) {
+      fs.mkdirSync(TEMP_DOWNLOAD_DIR, { recursive: true });
+      console.log(`Created download directory: ${TEMP_DOWNLOAD_DIR}`);
     }
   }
 
@@ -62,6 +70,22 @@ export class BrowserService {
 
     const page = await browser.pages();
     const mainPage = page[0];
+
+    try {
+      this.ensureDownloadDir();
+
+      const client = await mainPage.createCDPSession();
+      
+      await client.send('Page.setDownloadBehavior', {
+        behavior: 'allow',
+        downloadPath: TEMP_DOWNLOAD_DIR,
+      });
+
+      console.log(`✅ Download path set to: ${TEMP_DOWNLOAD_DIR}`);
+    } catch (error) {
+      console.error('❌ Failed to set download behavior:', error);
+    }
+
     return mainPage;
   }
 
@@ -80,7 +104,8 @@ export class BrowserService {
       '--disable-infobars',
       '--restore-last-session',
       '--disable-popup-blocking',
-      '--disable-notifications'
+      '--disable-notifications',
+      `--default-download-path=${TEMP_DOWNLOAD_DIR}`
     ];
 
     if (process.platform === 'win32') {
