@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { glob } from 'glob';
 import { env } from './env';
+import { production } from '../lib/node-env';
 
 async function generateOpenAPI() {
   console.log('🔍 Scanning for OpenAPI definitions...');
@@ -13,7 +14,7 @@ async function generateOpenAPI() {
     absolute: true    
   });
 
-  const serverUrl = env.NODE_ENV === 'production' 
+  const serverUrl = env.NODE_ENV === production
   ? `https://${env.PROD_HOST}`
   : `http://${env.HOST}:${env.PORT}`;
 
@@ -39,7 +40,7 @@ async function generateOpenAPI() {
     },
     servers: [{ 
       url: serverUrl,
-      description: env.NODE_ENV === 'production' ? 'Production server' : 'Development server',
+      description: env.NODE_ENV === production ? 'Production server' : 'Development server',
      }],
   });
 

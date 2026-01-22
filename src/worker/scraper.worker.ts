@@ -6,6 +6,9 @@ import { ArticleRequest } from '../lib/schema';
 import { ImageRequest } from '../lib/schema/image';
 import { ToneImage, ToneImagePrompts } from '../lib/tone/image';
 import { getAspectRatioInstruction } from '../lib/enum/aspect-ratio';
+import { getPublicImageUrl } from '../helper/cdn-url';
+import { env } from '../config/env';
+import { production } from '../lib/node-env';
 
 const AIService = new AiScraperService();
 
@@ -56,7 +59,7 @@ export const startWorker = async () => {
           await sendWebhook(imgData.webhookUrl, {
             type: 'IMAGE',
             prompt: imgData.prompt,
-            imagePath: imagePath, 
+            imagePath: env.NODE_ENV == production ? getPublicImageUrl(imagePath) : imagePath, 
             status: 'completed'
           });
         } else {

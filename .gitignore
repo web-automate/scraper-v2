@@ -1,5 +1,6 @@
 node_modules
 .env
+.env.prod
 dist
 build
 chrome_data_prod
