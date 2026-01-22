@@ -102,7 +102,7 @@ export const startWorker = async () => {
       if (data.webhookUrl) {
         await sendWebhook(data.webhookUrl, {
           type: jobType === 'IMAGE_GENERATION' ? 'IMAGE' : 'ARTICLE',
-          error: error.message,
+          error: "Internal server error",
           status: 'failed'
         });
       }

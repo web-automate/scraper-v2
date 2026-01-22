@@ -9,7 +9,7 @@
     "build": "pnpm swagger && tsc",
     "start": "dotenv node dist/index.js",
     "swagger": "ts-node src/config/swagger-gen.ts",
-    "prepare": "dotenv ts-node src/config/prepare_session.ts"
+    "session": "dotenv ts-node src/config/prepare_session.ts"
   },
   "author": "misbakhul munir",
   "license": "ISC",
