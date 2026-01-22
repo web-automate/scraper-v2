@@ -106,8 +106,9 @@ export class BrowserService {
       '--restore-last-session',
       '--disable-popup-blocking',
       '--disable-notifications',
-      `--default-download-path=${TEMP_DOWNLOAD_DIR}`
-    ];
+      `--default-download-path=${TEMP_DOWNLOAD_DIR}`,
+      '--ignore-certificate-errors',
+      '--ignore-certificate-errors-spki-list',];
 
     if (process.platform === 'win32') {
       this.browserProcess = spawn(CHROME_PATH, args, { detached: true });
