@@ -13,39 +13,15 @@ const SuccessResponseSchema = z.object({
 });
 
 registry.registerPath({
-  method: 'get',
-  path: '/api/article/status',
-  tags: ['Article'],
-  summary: 'Cek Status Artikel',
-  description: 'Endpoint ini memeriksa status artikel berdasarkan ID.',
-  request: { },
-  responses: {
-    200: {
-      description: 'Status Artikel Ditemukan',
-      content: {
-        'application/json': {
-          schema: SuccessResponseSchema,
-        },
-      },
-    },
-    404: {
-      description: 'Artikel Tidak Ditemukan',
-      content: {
-        'application/json': {
-          schema: z.object({ error: z.string() }),
-        },
-      },
-    },
-  },
-})
-
-registry.registerPath({
   method: 'post',
   path: '/api/article/generate',
   tags: ['Article'],
   summary: 'Generate Artikel via AI',
   description: 'Endpoint ini memvalidasi input menggunakan Zod dan mengirim task ke RabbitMQ.',
   request: {
+    headers: z.object({
+      'x-api-key': z.string().describe('API Key untuk autentikasi'),
+    }),
     body: {
       content: {
         'application/json': {

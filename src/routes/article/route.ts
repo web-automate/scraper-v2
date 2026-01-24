@@ -2,14 +2,11 @@ import { Router, Request, Response } from 'express';
 import { rabbitMQService } from '../../service/rabbitmq.service';
 import { ArticleRequest, publicArticleSchema } from '../../lib/schema';
 import { rateLimit } from '../../middleware/rate-limit';
+import { apiKeyAuth } from '../../middleware/auth';
 
 export const articleRouter = Router();
 
-articleRouter.get('/status', async (req: Request, res: Response): Promise<any> => {
-  return res.status(200).json({ success: true, message: 'Status OK' });
-});
-
-articleRouter.post('/generate', rateLimit({ windowMs: 60_000, max: 3 }), async (req: Request, res: Response): Promise<any> => {
+articleRouter.post('/generate', rateLimit({ windowMs: 60_000, max: 3 }), apiKeyAuth, async (req: Request, res: Response): Promise<any> => {
   const validation = publicArticleSchema.safeParse(req.body);
 
   if (!validation.success) {

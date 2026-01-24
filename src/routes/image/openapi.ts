@@ -19,6 +19,9 @@ registry.registerPath({
   summary: 'Generate Gambar via AI',
   description: 'Endpoint ini mengirim instruksi prompt ke browser automation untuk membuat gambar.',
   request: {
+    headers: z.object({
+      'x-api-key': z.string().describe('API Key untuk autentikasi'),
+    }),
     body: {
       content: {
         'application/json': {
