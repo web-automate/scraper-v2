@@ -9,7 +9,10 @@ const SuccessResponseSchema = z.object({
     topic: z.string(),
     status: z.string(),
     title: z.string(),
-    content: z.string()
+    content: z.string(),
+    articleData: z.object({
+      id: z.string().optional().openapi({ description: 'ID Artikel di Database', example: 'article_12345' }),
+    }).optional().openapi({ description: 'Data tambahan untuk artikel', example: { id: 'article_12345' } }),
   })
 });
 
