@@ -1,18 +1,18 @@
-import express, { Request, Response, NextFunction } from 'express';
-import { Server } from 'http';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import express, { NextFunction, Request, Response } from 'express';
 import fs from 'fs';
+import { Server } from 'http';
 import path from 'path';
-import swaggerUi from 'swagger-ui-express'; 
+import swaggerUi from 'swagger-ui-express';
+import { env } from './config/env';
+import { rateLimit } from './middleware/rate-limit';
 import { articleRouter } from './routes/article/route';
+import { imageRouter } from './routes/image/route';
 import { browserService } from './service/browser.service';
 import { rabbitMQService } from './service/rabbitmq.service';
-import { startWorker } from './worker/scraper.worker';
-import dotenv from 'dotenv';
-import { env } from './config/env';
-import { imageRouter } from './routes/image/route';
-import { rateLimit } from './middleware/rate-limit';
-import cors from 'cors';
 import { sessionMonitor } from './service/session-monitor.service';
+import { startWorker } from './worker/scraper.worker';
 
 dotenv.config();
 
@@ -44,6 +44,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 if (swaggerFile) {
     app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
+    app.use('/api/docs.json', (req: Request, res: Response) => {
+      res.json(swaggerFile);
+    });
     console.log('✅ Swagger UI available at /api/docs');
 } else {
   console.log('⚠️ Swagger documentation file not found. Swagger UI will not be available.');
