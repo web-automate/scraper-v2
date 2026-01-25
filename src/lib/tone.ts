@@ -1,3 +1,5 @@
+import { ToneImagePrompts } from "./tone/image";
+
 const HEADING_RULES = `
    - **Heading Hierarchy (MANDATORY):** - Use **H2 (##)** for all main distinct sections/paragraphs.
      - Use **H3 (###)** for detailed subsections or specific points within an H2.
@@ -254,3 +256,33 @@ export enum ToneEnum {
 }
 
 export type Tone = keyof typeof TonePrompts;
+
+export const imagePlaceholder = `
+5. VISUAL ASSETS (IMAGE PLACEHOLDERS):
+   - **Placement:** You MUST insert image placeholders in the format [image_location_X] (e.g., [image_location_1], [image_location_2]).
+   - **Logic:** Place them where a visual aid would most benefit the reader (e.g., after a complex explanation or at the start of a major section).
+   - **Quantity:** Use exactly {{IMAGE_COUNT}} placeholders throughout the article.
+   - **Spacing:** Distribute them evenly. Do not cluster all images in one section.
+`;
+
+export const imagePromptGenerator = `
+6. IMAGE PROMPT SPECIFICATIONS (STRICT FORMAT):
+   - You MUST generate exactly one JSON block at the very end of the response.
+   - The JSON block MUST be wrapped between ---START_IMAGE_JSON--- and ---END_IMAGE_JSON--- delimiters.
+   - Do NOT use markdown code blocks (like \`\`\`json) inside the delimiters.
+   - Each prompt must be descriptive, high-quality, and matching the article's context.
+   - **TONE SELECTION**: For each image, you must assign one of these exact tone keys: [${Object.keys(ToneImagePrompts).join(', ')}].
+   - Use this exact structure:
+   
+   ---START_IMAGE_JSON---
+   {
+     "images": [
+       {
+         "index": 1, 
+         "tone": "selected_tone_key", 
+         "prompt": "Detailed description of the subject and scene..."
+       }
+     ]
+   }
+   ---END_IMAGE_JSON---
+`;

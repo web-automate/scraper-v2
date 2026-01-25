@@ -34,6 +34,22 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key']
 }));
 
+const whitelistArray = (env.RATE_LIMIT_WHITELIST || '')
+  .split(',')
+  .map(item => item.trim())
+  .filter(Boolean);
+
+const limiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 5,
+  whitelist: whitelistArray,
+  skip: (req) => {
+    return process.env.NODE_ENV === 'development';
+  }
+});
+
+app.use(limiter);
+
 app.use(express.json());
 
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -52,7 +68,7 @@ if (swaggerFile) {
   console.log('⚠️ Swagger documentation file not found. Swagger UI will not be available.');
 }
 
-app.get('/health', rateLimit({ windowMs: 60_000, max: 5 }), (req: Request, res: Response) => {
+app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({ 
     success: true, 
     message: 'System Healthy', 

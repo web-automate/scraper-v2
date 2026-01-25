@@ -1,12 +1,12 @@
 import { Request, Response, Router } from 'express';
-import { ArticleRequest, publicArticleSchema } from '../../lib/schema';
+import { GenerateStatus } from '../../lib/enum/status-response';
+import { ArticleRequest, publicArticleSchema, SuccessArticleResponse } from '../../lib/schema/article';
 import { apiKeyAuth } from '../../middleware/auth';
-import { rateLimit } from '../../middleware/rate-limit';
 import { rabbitMQService } from '../../service/rabbitmq.service';
 
 export const articleRouter = Router();
 
-articleRouter.post('/generate', rateLimit({ windowMs: 60_000, max: 3 }), apiKeyAuth, async (req: Request, res: Response): Promise<any> => {
+articleRouter.post('/generate', apiKeyAuth, async (req: Request, res: Response): Promise<any> => {
   const validation = publicArticleSchema.safeParse(req.body);
 
   if (!validation.success) {
@@ -18,21 +18,25 @@ articleRouter.post('/generate', rateLimit({ windowMs: 60_000, max: 3 }), apiKeyA
   try {
     await rabbitMQService.publishToQueue(payload);
 
-    return res.status(202).json({
+    const data: SuccessArticleResponse = {
       success: true,
       message: 'Request accepted and queued for processing.',
       data: {
-        topic: payload.topic,
-        keywords: payload.keywords || [],
-        category: payload.category || 'general',
-        tone: payload.tone || 'neutral',
-        status: 'queued',
+        status: GenerateStatus.GENERATING,
         webhookUrl: payload.webhookUrl || 'Not provided (Result will be logged only)',
-        articleData: payload.articleData || {}
+        articleData: payload.articleData || {},
       }
-    });
+    }
+
+    return res.status(202).json(data);
   } catch (error: any) {
     console.error(error);
-    return res.status(500).json({ success: false, error: 'Failed to queue job' });
+    return res.status(500).json({ 
+      success: false,
+      error: 'Failed to queue job',
+      data: {
+        status: GenerateStatus.FAILED,
+      }
+    });
   }
 });

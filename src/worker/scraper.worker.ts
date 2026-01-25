@@ -1,11 +1,12 @@
 import axios from 'axios';
 import { env } from '../config/env';
 import { getPublicImageUrl } from '../helper/cdn-url';
-import { getAspectRatioInstruction } from '../lib/enum/aspect-ratio';
-import { extractTitleAndCleanContent } from '../lib/helper/article';
+import { promptContent, promptImage } from '../lib/constants/prompt';
+import { GenerateStatus } from '../lib/enum/status-response';
+import { extractArticleData } from '../lib/helper/article';
 import { production } from '../lib/node-env';
-import { ArticleRequest } from '../lib/schema';
-import { ImageRequest } from '../lib/schema/image';
+import { ArticleRequest, ArticleWebhookResponse } from '../lib/schema/article';
+import { ImageRequest, ImageWebhookResponse } from '../lib/schema/image';
 import { Tone, TonePrompts } from '../lib/tone';
 import { ToneImage, ToneImagePrompts } from '../lib/tone/image';
 import { rabbitMQService } from '../service/rabbitmq.service';
@@ -21,6 +22,7 @@ export const startWorker = async () => {
   await rabbitMQService.consume(async (data: JobPayload) => {
 
     const jobType = data.type || 'ARTICLE_GENERATION';
+    let withImages = false;
 
     console.log(`[Worker] Processing Job Type: ${jobType}`);
 
@@ -32,69 +34,53 @@ export const startWorker = async () => {
         const selectedTone = (imgData.tone as ToneImage) || 'artSchool';
         const toneGuideline = ToneImagePrompts[selectedTone] || ToneImagePrompts.artSchool;
 
-        const prompt = `
-        Generative Image Prompt Structure
-        ---------------------------------
-
-        [SUBJECT / CONTENT]
-        ${imgData.prompt.trim()}
-
-        [ARTISTIC STYLE & TONE]
-        ${toneGuideline.trim()}
-
-        [COMPOSITION & DIMENSIONS]
-        Target Aspect Ratio: ${imgData.aspectRatio}
-        Framing Guideline: ${getAspectRatioInstruction(imgData.aspectRatio)}
-        Ensure the subject is framed correctly according to this ratio (e.g., don't crop heads in vertical, fill sides in horizontal).
-
-        [OUTPUT CONSTRAINTS]
-        CRITICAL: Generate exactly ONE single image frame. Do not create a grid, collage, split-screen, or multiple panels. The final output must be a singular, cohesive composition.
-
-        [SYNTHESIS INSTRUCTIONS]
-        Combine the subject content with the artistic tone and composition guidelines seamlessly.
-        `.trim();
+        const prompt = promptImage(imgData, toneGuideline);
 
         const imagePath = await AIService.generateImage(prompt, imgData.webpFormat, imgData.imageMaxSizeKB);
 
+        const payload: ImageWebhookResponse = {
+          type: 'IMAGE',
+          imagePath: env.NODE_ENV == production ? getPublicImageUrl(imagePath) : imagePath,
+          status: GenerateStatus.COMPLETED,
+          articleData: {
+            id: imgData.articleData?.id,
+            imageIndex: imgData.articleData?.imageIndex || 0,
+          }
+        };
+
         if (imgData.webhookUrl) {
-          await sendWebhook(imgData.webhookUrl, {
-            type: 'IMAGE',
-            prompt: imgData.prompt,
-            imagePath: env.NODE_ENV == production ? getPublicImageUrl(imagePath) : imagePath,
-            status: 'completed'
-          });
+          await sendWebhook(imgData.webhookUrl, payload);
         } else {
           console.log(`[Worker] Image generated at: ${imagePath}`);
         }
 
       } else {
         const artData = data as ArticleRequest;
+        withImages = artData.imageCount > 0;
         const selectedTone = (artData.tone as Tone) || 'educational';
         const toneGuideline = TonePrompts[selectedTone] || TonePrompts.educational;
 
-        const prompt = `
-          Generate a detailed article based on the following specifications:
-          TASK SPECIFICATION:
-          Topic: ${artData.topic}
-          Keywords: ${artData.keywords?.join(', ') || 'None'}
-          Category: ${artData.category || 'General'}
-          ${toneGuideline}
-        `.trim();
+        const prompt = promptContent(artData, toneGuideline);
 
         console.log(`[Worker] Generating Article: "${artData.topic}" (${selectedTone})`);
 
         const result = await AIService.generateContent(prompt);
-        const { title, cleanContent } = extractTitleAndCleanContent(result);
+        const { title, cleanContent, imagePrompts } = extractArticleData(result);
 
         if (artData.webhookUrl) {
-          await sendWebhook(artData.webhookUrl, {
+          const payload: ArticleWebhookResponse = {
             type: 'ARTICLE',
             topic: artData.topic,
             title: title,
             content: cleanContent,
             articleData: artData.articleData || {},
-            status: 'completed'
-          });
+            status: withImages ? GenerateStatus.WAITING_FOR_IMAGES : GenerateStatus.COMPLETED,
+            properties: {
+              imageCount: artData.imageCount,
+              imagePrompts: imagePrompts,
+            }
+          }
+          await sendWebhook(artData.webhookUrl, payload);
         } else {
           console.log('Snippet:', result.substring(0, 50) + '...');
         }
@@ -107,7 +93,7 @@ export const startWorker = async () => {
         await sendWebhook(data.webhookUrl, {
           type: jobType === 'IMAGE_GENERATION' ? 'IMAGE' : 'ARTICLE',
           error: error.message,
-          status: 'failed'
+          status: GenerateStatus.FAILED
         });
       }
       throw error;
