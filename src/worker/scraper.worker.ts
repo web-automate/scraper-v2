@@ -110,6 +110,12 @@ async function sendWebhook(url: string, payload: any) {
         'Content-Type': 'application/json'
       }
     });
+    await axios.post(url, payload, {
+      headers: {
+        'x-api-key': `${env.API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
     console.log('[Webhook] Sent successfully.');
   } catch (webhookError) {
     console.error('[Webhook] Failed to send:', webhookError);
