@@ -1,12 +1,12 @@
-import { Router, Request, Response } from 'express';
-import { rabbitMQService } from '../../service/rabbitmq.service';
-import { ImageRequest, imageRequestSchema } from '../../lib/schema/image';
-import { rateLimit } from '../../middleware/rate-limit';
+import { Request, Response, Router } from 'express';
+import { GenerateStatus } from '../../lib/enum/status-response';
+import { ImageRequest, imageRequestSchema, SuccessImageResponseType } from '../../lib/schema/image';
 import { apiKeyAuth } from '../../middleware/auth';
+import { rabbitMQService } from '../../service/rabbitmq.service';
 
 export const imageRouter = Router();
 
-imageRouter.post('/generate', rateLimit({ windowMs: 60_000, max: 3 }), apiKeyAuth, async (req: Request, res: Response): Promise<any> => {
+imageRouter.post('/generate', apiKeyAuth, async (req: Request, res: Response): Promise<any> => {
   const validation = imageRequestSchema.safeParse(req.body);
 
   if (!validation.success) {
@@ -18,21 +18,23 @@ imageRouter.post('/generate', rateLimit({ windowMs: 60_000, max: 3 }), apiKeyAut
   try {
     const queuePayload = {
       ...payload,
-      type: 'IMAGE_GENERATION', 
+      type: 'IMAGE_GENERATION',
       createdAt: new Date()
     };
 
     await rabbitMQService.publishToQueue(queuePayload);
 
-    return res.status(202).json({ 
-      success: true, 
+    const data: SuccessImageResponseType = {
+      success: true,
       message: 'Image generation request queued.',
       data: {
         prompt: payload.prompt,
-        status: 'queued',
+        status: GenerateStatus.GENERATING,
         webhookUrl: payload.webhookUrl || 'Not provided'
       }
-    });
+    }
+
+    return res.status(202).json(data);
 
   } catch (error: any) {
     console.error('[ImageRoute] Error:', error);

@@ -1,16 +1,6 @@
-import { registry } from '../../lib/openapi.registry';
 import { z } from 'zod';
-import { imageRequestSchema } from '../../lib/schema/image';
-
-const SuccessImageResponse = z.object({
-  success: z.boolean(),
-  message: z.string(),
-  data: z.object({
-    jobId: z.uuid().optional(),
-    status: z.string(),
-    prompt: z.string(),
-  })
-});
+import { registry } from '../../lib/openapi.registry';
+import { imageRequestSchema, SuccessImageResponse, } from '../../lib/schema/image';
 
 registry.registerPath({
   method: 'post',

@@ -15,4 +15,5 @@ export const env = {
   RABBITMQ_PORT: process.env.RABBITMQ_PORT || '5672',
   RABBITMQ_USER: process.env.RABBITMQ_USER || 'guest',
   RABBITMQ_PASSWORD: process.env.RABBITMQ_PASSWORD || 'guest',
+  RATE_LIMIT_WHITELIST: process.env.RATE_LIMIT_WHITELIST || '',
 }
