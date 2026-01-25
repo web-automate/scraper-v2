@@ -12,3 +12,4 @@ data/sessions/session-gemini.json
 ./session-chatgpt.json
 ./session-gemini.json
 content/images/*.png
+content/images/*.webp
