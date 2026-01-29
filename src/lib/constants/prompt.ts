@@ -16,9 +16,9 @@ export const promptContent = (artData: ArticleRequest, toneGuideline: string) =>
 
   VISUAL ASSETS CONFIGURATION:
   - Total Images Requested: ${artData.imageCount || 0}
-  ${artData.imageCount > 0
+  ${(artData.imageCount || 0) > 0
         ? `
-  ${imagePlaceholder.replace('{{IMAGE_COUNT}}', artData.imageCount.toString())}
+  ${imagePlaceholder.replace('{{IMAGE_COUNT}}', (artData.imageCount || 0).toString())}
   ${imagePromptGenerator}
     `.trim()
         : 'No images or placeholders required for this article.'}

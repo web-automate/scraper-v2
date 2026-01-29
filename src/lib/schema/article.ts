@@ -42,10 +42,9 @@ export const publicArticleSchema = z.object({
     }),
   imageCount: z.number()
     .int()
-    .min(1)
+    .min(0)
     .max(5)
     .optional()
-    .default(2)
     .openapi({
       description: 'Jumlah gambar yang diinginkan',
       example: 3

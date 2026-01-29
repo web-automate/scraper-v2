@@ -67,7 +67,7 @@ export class RabbitMQService {
         } catch (error) {
           console.error(`[Consumer] Job Failed:`, error);
           await sleep(5000);
-          this.channel?.ack(msg); 
+          this.channel?.nack(msg, false, true); 
         }
       }
     });

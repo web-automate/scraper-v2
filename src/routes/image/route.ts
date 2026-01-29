@@ -29,7 +29,7 @@ imageRouter.post('/generate', apiKeyAuth, async (req: Request, res: Response): P
       message: 'Image generation request queued.',
       data: {
         prompt: payload.prompt,
-        status: GenerateStatus.GENERATING,
+        status: GenerateStatus.QUEUED,
         webhookUrl: payload.webhookUrl || 'Not provided'
       }
     }

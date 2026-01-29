@@ -1,5 +1,6 @@
 export const GenerateStatus = {
   PENDING: 'pending',
+  QUEUED: 'queued',
   GENERATING: 'generating',
   WAITING_FOR_IMAGES: 'waiting_for_images',
   COMPLETED: 'completed',

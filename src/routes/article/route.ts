@@ -15,6 +15,8 @@ articleRouter.post('/generate', apiKeyAuth, async (req: Request, res: Response):
 
   const payload: ArticleRequest = validation.data;
 
+  console.log(`[Route] Received Article Request: ${JSON.stringify(payload)}`);
+
   try {
     await rabbitMQService.publishToQueue(payload);
 
@@ -22,11 +24,13 @@ articleRouter.post('/generate', apiKeyAuth, async (req: Request, res: Response):
       success: true,
       message: 'Request accepted and queued for processing.',
       data: {
-        status: GenerateStatus.GENERATING,
+        status: GenerateStatus.QUEUED,
         webhookUrl: payload.webhookUrl || 'Not provided (Result will be logged only)',
         articleData: payload.articleData || {},
       }
     }
+
+    console.log(`[Route] Generated Article Request: ${JSON.stringify(payload)}`);
 
     return res.status(202).json(data);
   } catch (error: any) {

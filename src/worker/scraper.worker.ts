@@ -9,6 +9,7 @@ import { ArticleRequest, ArticleWebhookResponse } from '../lib/schema/article';
 import { ImageRequest, ImageWebhookResponse } from '../lib/schema/image';
 import { Tone, TonePrompts } from '../lib/tone';
 import { ToneImage, ToneImagePrompts } from '../lib/tone/image';
+import { WebhookResponse } from '../routes/openapi';
 import { rabbitMQService } from '../service/rabbitmq.service';
 import { AiScraperService } from '../service/scraper.service';
 
@@ -25,6 +26,22 @@ export const startWorker = async () => {
     let withImages = false;
 
     console.log(`[Worker] Processing Job Type: ${jobType}`);
+
+    const normalizedType = jobType === 'IMAGE_GENERATION' ? 'IMAGE' : 'ARTICLE';
+
+    console.log(`${data}`)
+
+    const payloadJob: WebhookResponse = {
+      type: normalizedType, 
+      status: GenerateStatus.GENERATING,
+      articleData: data.articleData || {}, 
+    }
+
+    if (data.webhookUrl && normalizedType === 'ARTICLE') {
+      console.log(`[Worker] Return Generating Status to Webhook: ${data.webhookUrl}`);
+      console.log(`[Worker] Payload Job: ${JSON.stringify(payloadJob)}`);
+      await sendWebhook(data.webhookUrl || '', payloadJob);
+    }
 
     try {
       if (jobType === 'IMAGE_GENERATION') {
@@ -56,7 +73,7 @@ export const startWorker = async () => {
 
       } else {
         const artData = data as ArticleRequest;
-        withImages = artData.imageCount > 0;
+        withImages = (artData.imageCount || 0) > 0;
         const selectedTone = (artData.tone as Tone) || 'educational';
         const toneGuideline = TonePrompts[selectedTone] || TonePrompts.educational;
 
@@ -76,7 +93,7 @@ export const startWorker = async () => {
             articleData: artData.articleData || {},
             status: withImages ? GenerateStatus.WAITING_FOR_IMAGES : GenerateStatus.COMPLETED,
             properties: {
-              imageCount: artData.imageCount,
+              imageCount: artData.imageCount || 0,
               imagePrompts: imagePrompts,
             }
           }
