@@ -87,6 +87,9 @@ app.get('/manifest.json', (req: Request, res: Response) => {
 app.get('/og-image.png', (req: Request, res: Response) => {
   res.sendFile(path.join(process.cwd(), 'src/lib/html/assets/og-image.png'));
 });
+app.get('/css/style.css', (req: Request, res: Response) => {
+  res.sendFile(path.join(process.cwd(), 'src/lib/html/assets/css/style.css'));
+});
 
 app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({ 
@@ -96,6 +99,9 @@ app.get('/health', (req: Request, res: Response) => {
   });
 });
 
+app.use('/api/auth', limiter, authRouter);
+app.use('/api/article', limiter, apiKeyAuth, articleRouter);
+app.use('/api/image', limiter, apiKeyAuth, imageRouter);
 app.use('/api/auth', limiter, authRouter);
 app.use('/api/article', limiter, apiKeyAuth, articleRouter);
 app.use('/api/image', limiter, apiKeyAuth, imageRouter);
@@ -114,8 +120,11 @@ const startApp = async () => {
     console.log('[1/4] 🌐 Launching Browser Service...');
     // await browserService.launch();
     // await browserService.initSession(`session-${env.AI_PROVIDER}`);
+    // await browserService.launch();
+    // await browserService.initSession(`session-${env.AI_PROVIDER}`);
     console.log('      ✅ Browser Ready');
 
+    // sessionMonitor.start();
     // sessionMonitor.start();
 
     console.log('[2/4] 🐰 Connecting to RabbitMQ...');
