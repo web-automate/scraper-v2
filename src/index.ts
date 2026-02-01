@@ -102,6 +102,9 @@ app.get('/health', (req: Request, res: Response) => {
 app.use('/api/auth', limiter, authRouter);
 app.use('/api/article', limiter, apiKeyAuth, articleRouter);
 app.use('/api/image', limiter, apiKeyAuth, imageRouter);
+app.use('/api/auth', limiter, authRouter);
+app.use('/api/article', limiter, apiKeyAuth, articleRouter);
+app.use('/api/image', limiter, apiKeyAuth, imageRouter);
 
 app.use((req: Request, res: Response) => {
   res.status(404).json({ success: false, error: 'Endpoint not found' });
@@ -117,8 +120,11 @@ const startApp = async () => {
     console.log('[1/4] 🌐 Launching Browser Service...');
     // await browserService.launch();
     // await browserService.initSession(`session-${env.AI_PROVIDER}`);
+    // await browserService.launch();
+    // await browserService.initSession(`session-${env.AI_PROVIDER}`);
     console.log('      ✅ Browser Ready');
 
+    // sessionMonitor.start();
     // sessionMonitor.start();
 
     console.log('[2/4] 🐰 Connecting to RabbitMQ...');
