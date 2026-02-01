@@ -1,12 +1,18 @@
 import { Request, Response, Router } from 'express';
 import { GenerateStatus } from '../../lib/enum/status-response';
 import { ArticleRequest, publicArticleSchema, SuccessArticleResponse } from '../../lib/schema/article';
-import { apiKeyAuth } from '../../middleware/auth';
 import { rabbitMQService } from '../../service/rabbitmq.service';
 
 export const articleRouter = Router();
 
-articleRouter.post('/generate', apiKeyAuth, async (req: Request, res: Response): Promise<any> => {
+articleRouter.get('/health', (req: Request, res: Response): any => {
+  return res.status(200).json({
+    success: true,
+    message: 'Article Service is healthy',
+  });
+});
+
+articleRouter.post('/generate', async (req: Request, res: Response): Promise<any> => {
   const validation = publicArticleSchema.safeParse(req.body);
 
   if (!validation.success) {

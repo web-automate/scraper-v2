@@ -5,13 +5,15 @@ import { imageRequestSchema, SuccessImageResponse, } from '../../lib/schema/imag
 registry.registerPath({
   method: 'post',
   path: '/api/image/generate',
+  security: [
+    {
+      BearerAuth: [], 
+    },
+  ],
   tags: ['Image'],
-  summary: 'Generate Gambar via AI',
-  description: 'Endpoint ini mengirim instruksi prompt ke browser automation untuk membuat gambar.',
+  summary: 'Generate Image via AI',
+  description: 'This endpoint sends prompt instructions to browser automation to create images.',
   request: {
-    headers: z.object({
-      'x-api-key': z.string().describe('API Key untuk autentikasi'),
-    }),
     body: {
       content: {
         'application/json': {
@@ -22,7 +24,7 @@ registry.registerPath({
   },
   responses: {
     202: {
-      description: 'Request diterima dan masuk antrian',
+      description: 'Request accepted and queued for processing',
       content: {
         'application/json': {
           schema: SuccessImageResponse,
@@ -30,7 +32,7 @@ registry.registerPath({
       },
     },
     400: {
-      description: 'Validasi Gagal',
+      description: 'Validation Failed',
       content: {
         'application/json': {
           schema: z.object({ error: z.string() }),

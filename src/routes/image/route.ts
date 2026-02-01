@@ -1,12 +1,11 @@
 import { Request, Response, Router } from 'express';
 import { GenerateStatus } from '../../lib/enum/status-response';
 import { ImageRequest, imageRequestSchema, SuccessImageResponseType } from '../../lib/schema/image';
-import { apiKeyAuth } from '../../middleware/auth';
 import { rabbitMQService } from '../../service/rabbitmq.service';
 
 export const imageRouter = Router();
 
-imageRouter.post('/generate', apiKeyAuth, async (req: Request, res: Response): Promise<any> => {
+imageRouter.post('/generate', async (req: Request, res: Response): Promise<any> => {
   const validation = imageRequestSchema.safeParse(req.body);
 
   if (!validation.success) {

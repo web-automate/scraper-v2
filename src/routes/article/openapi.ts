@@ -4,15 +4,43 @@ import { registry } from '../../lib/openapi.registry';
 import { publicArticleSchema, SuccessArticleResponseSchema } from '../../lib/schema/article';
 
 registry.registerPath({
+  method: 'get',
+  path: '/api/article/health',
+  security: [
+    {
+      BearerAuth: [], 
+    },
+  ],
+  tags: ['Article'],
+  summary: 'Check Article Service Health',
+  description: 'This endpoint checks the health status of the Article Service.',
+  responses: {
+    200: {
+      description: 'Article Service is healthy',
+      content: {
+        'application/json': {
+          schema: z.object({
+            success: z.boolean(),
+            message: z.string(),
+          }),
+        },
+      },
+    },
+  },
+})
+
+registry.registerPath({
   method: 'post',
   path: '/api/article/generate',
+  security: [
+    {
+      BearerAuth: [], 
+    },
+  ],
   tags: ['Article'],
-  summary: 'Generate Artikel via AI',
-  description: 'Endpoint ini memvalidasi input menggunakan Zod dan mengirim task ke RabbitMQ.',
+  summary: 'Generate Article via AI',
+  description: 'This endpoint validates the input using Zod and sends a task to RabbitMQ.',
   request: {
-    headers: z.object({
-      'x-api-key': z.string().describe('API Key untuk autentikasi'),
-    }),
     body: {
       content: {
         'application/json': {
@@ -23,7 +51,7 @@ registry.registerPath({
   },
   responses: {
     202: {
-      description: 'Request diterima dan masuk antrian',
+      description: 'Request accepted and added to queue',
       content: {
         'application/json': {
           schema: SuccessArticleResponseSchema,
@@ -31,7 +59,7 @@ registry.registerPath({
       },
     },
     400: {
-      description: 'Validasi Gagal',
+      description: 'Validation Failed',
       content: {
         'application/json': {
           schema: z.object({ error: z.string() }),
