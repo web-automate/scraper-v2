@@ -11,33 +11,33 @@ export const publicArticleSchema = z.object({
   topic: z.string()
     .min(5)
     .openapi({
-      description: 'Topik utama artikel',
-      example: 'Pola Pikir dan Nilai-Nilai Generasi Z'
+      description: 'Main topic of the article',
+      example: 'The Mindset and Values of Generation Z'
     }),
   keywords: z.array(z.string())
     .optional()
     .openapi({
-      description: 'List keyword SEO',
+      description: 'List of SEO keywords',
       example: ['Digital Native', 'Mental Health', 'Work-Life Balance']
     }),
   category: z.string()
     .optional()
     .default('General')
     .openapi({
-      description: 'Kategori Artikel',
+      description: 'Article category',
       example: 'Sociology'
     }),
   tone: z.enum(ToneEnum)
     .optional()
     .default(ToneEnum.educational)
     .openapi({
-      description: 'Gaya Bahasa',
+      description: 'Article tone',  
       example: 'professional'
     }),
   webhookUrl: z.url()
     .optional()
     .openapi({
-      description: 'URL Callback',
+      description: 'Callback URL',
       example: 'https://webhook.site/33cd8820-26dc-4e40-b3e5-a6b2fdfe3401'
     }),
   imageCount: z.number()
@@ -46,12 +46,12 @@ export const publicArticleSchema = z.object({
     .max(5)
     .optional()
     .openapi({
-      description: 'Jumlah gambar yang diinginkan',
+      description: 'Number of images to generate',
       example: 3
     }),
   articleData: z.object({
-    id: z.string().optional().openapi({ description: 'ID Artikel di Database', example: 'article_12345' }),
-  }).optional().openapi({ description: 'Data tambahan untuk artikel', example: { id: 'article_12345' } }),
+    id: z.string().optional().openapi({ description: 'Article ID in Database', example: 'article_12345' }),
+  }).optional().openapi({ description: 'Additional article data', example: { id: 'article_12345' } }),
 }).openapi('ArticleRequest'); // <-- PENTING: Beri nama Component Schema di sini
 
 export const SuccessArticleResponseSchema = z.object({
@@ -64,8 +64,8 @@ export const SuccessArticleResponseSchema = z.object({
       example: 'https://webhook.site/33cd8820-26dc-4e40-b3e5-a6b2fdfe3401'
     }),
     articleData: z.object({
-      id: z.string().optional().openapi({ description: 'ID Artikel di Database', example: 'article_12345' }),
-    }).optional().openapi({ description: 'Data tambahan untuk artikel', example: { id: 'article_12345' } }),
+      id: z.string().optional().openapi({ description: 'Article ID in Database', example: 'article_12345' }),
+    }).optional().openapi({ description: 'Additional article data', example: { id: 'article_12345' } }),
   })
 }).openapi('SuccessArticleResponse');
 
@@ -75,8 +75,8 @@ export const ArticleWebhookResponseSchema = z.object({
   title: z.string(),
   content: z.string(),
   articleData: z.object({
-    id: z.string().optional().openapi({ description: 'ID Artikel di Database', example: 'article_12345' }),
-  }).optional().openapi({ description: 'Data tambahan untuk artikel', example: { id: 'article_12345' } }),
+    id: z.string().optional().openapi({ description: 'Article ID in Database', example: 'article_12345' }),
+  }).optional().openapi({ description: 'Additional article data', example: { id: 'article_12345' } }),
   status: z.nativeEnum(GenerateStatus),
   properties: z.object({
     imageCount: z.number().int().min(0).max(5).default(0),
@@ -87,10 +87,10 @@ export const ArticleWebhookResponseSchema = z.object({
         prompt: z.string().openapi({ example: 'A professional workspace with neon lighting, 8k' }),
       })
     ).optional().openapi({ 
-      description: 'Daftar prompt gambar hasil ekstraksi AI',
+      description: 'List of image prompts for AI-generated images',
     }),
   }).optional().openapi({
-    description: 'Metadata tambahan untuk pemrosesan gambar',
+    description: 'Additional metadata for image processing',
     example: { 
       imageCount: 2,
       imagePrompts: [

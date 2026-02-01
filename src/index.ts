@@ -6,12 +6,13 @@ import { Server } from 'http';
 import path from 'path';
 import swaggerUi from 'swagger-ui-express';
 import { env } from './config/env';
+import { apiKeyAuth } from './middleware/auth';
 import { rateLimit } from './middleware/rate-limit';
 import { articleRouter } from './routes/article/route';
+import { authRouter } from './routes/auth/route';
 import { imageRouter } from './routes/image/route';
 import { browserService } from './service/browser.service';
 import { rabbitMQService } from './service/rabbitmq.service';
-import { sessionMonitor } from './service/session-monitor.service';
 import { startWorker } from './worker/scraper.worker';
 
 dotenv.config();
@@ -48,8 +49,6 @@ const limiter = rateLimit({
   }
 });
 
-app.use(limiter);
-
 app.use(express.json());
 
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -68,6 +67,27 @@ if (swaggerFile) {
   console.log('⚠️ Swagger documentation file not found. Swagger UI will not be available.');
 }
 
+app.get('/', (req: Request, res: Response) => {
+  res.sendFile(path.join(process.cwd(), 'src/lib/html/index.html'));
+});
+app.get('/favicon.ico', (req: Request, res: Response) => {
+  res.sendFile(path.join(process.cwd(), 'src/lib/html/assets/favicon.ico'));
+});
+app.get('/robots.txt', (req: Request, res: Response) => {
+  res.sendFile(path.join(process.cwd(), 'src/lib/html/robots.txt'));
+});
+app.get('/sitemap.xml', (req: Request, res: Response) => {
+  res.header('Content-Type', 'application/xml'); // Penting biar browser tau ini XML
+  res.sendFile(path.join(process.cwd(), 'src/lib/html/sitemap.xml'));
+});
+app.get('/manifest.json', (req: Request, res: Response) => {
+  res.header('Content-Type', 'application/json');
+  res.sendFile(path.join(process.cwd(), 'src/lib/html/assets/manifest.json'));
+});
+app.get('/og-image.png', (req: Request, res: Response) => {
+  res.sendFile(path.join(process.cwd(), 'src/lib/html/assets/og-image.png'));
+});
+
 app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({ 
     success: true, 
@@ -76,8 +96,9 @@ app.get('/health', (req: Request, res: Response) => {
   });
 });
 
-app.use('/api/article', articleRouter);
-app.use('/api/image', imageRouter);
+app.use('/api/auth', limiter, authRouter);
+app.use('/api/article', limiter, apiKeyAuth, articleRouter);
+app.use('/api/image', limiter, apiKeyAuth, imageRouter);
 
 app.use((req: Request, res: Response) => {
   res.status(404).json({ success: false, error: 'Endpoint not found' });
@@ -91,11 +112,11 @@ const startApp = async () => {
     console.log(`\n--- ${env.AI_PROVIDER.toUpperCase()} ---\n`);
     
     console.log('[1/4] 🌐 Launching Browser Service...');
-    await browserService.launch();
-    await browserService.initSession(`session-${env.AI_PROVIDER}`);
+    // await browserService.launch();
+    // await browserService.initSession(`session-${env.AI_PROVIDER}`);
     console.log('      ✅ Browser Ready');
 
-    sessionMonitor.start();
+    // sessionMonitor.start();
 
     console.log('[2/4] 🐰 Connecting to RabbitMQ...');
     try {

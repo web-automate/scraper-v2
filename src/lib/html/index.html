@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Free AI Article Generator API | Automate SEO Content with ChatGPT & Gemini</title>
+    <meta name="title" content="Free AI Article Generator API | Automate SEO Content with ChatGPT & Gemini">
+    <meta name="description" content="Generate high-quality SEO articles & images automatically with our Free AI Scraper API. Best free alternative for auto-blogging and content automation.">
+    <meta name="keywords" content="free ai article generator api, chatgpt scraper api, gemini content generator, api artikel gratis, automated blog writing api, puppeteer ai scraper, seo content automation, nodejs scraper api, free content generation for developers">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="English">
+    <meta name="author" content="Misbakhul">
+    <meta name="publisher" content="Misbakhul">
+    <meta name="revisit-after" content="7 days">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://scraper.misbakhul.my.id/">
+    <meta property="og:title" content="Free AI Article Generator API - Build Auto Blogs Fast">
+    <meta property="og:description" content="Stop writing manually. Use our API to generate unlimited SEO articles with images using ChatGPT & Gemini infrastructure. Get your API Key now.">
+    <meta property="og:image" content="https://scraper.misbakhul.my.id/og-image.png"> <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://scraper.misbakhul.my.id/">
+    <meta property="twitter:title" content="Free AI Article Generator API | Automate SEO Content">
+    <meta property="twitter:description" content="Generate high-quality SEO articles & images automatically with our Free AI Scraper API. Best tool for developers.">
+    <meta property="twitter:image" content="https://scraper.misbakhul.my.id/og-image.png">
+
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="canonical" href="https://scraper.misbakhul.my.id/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "AI Article Scraper API",
+      "operatingSystem": "Web",
+      "applicationCategory": "DeveloperApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "IDR",
+        "description": "Free Tier Available for Developers"
+      },
+      "description": "API service to generate articles using AI (ChatGPT/Gemini) via Puppeteer scraping with RabbitMQ queue system.",
+      "author": {
+        "@type": "Person",
+        "name": "Misbakhul"
+      }
+    }
+    </script>
+</head>
+<body class="bg-slate-900 text-slate-50 antialiased selection:bg-indigo-500 selection:text-white">
+
+    <nav class="fixed w-full z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400">
+                        AI Scraper API
+                    </span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#features" class="hover:text-indigo-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">Stack</a>
+                        <a href="#architecture" class="hover:text-indigo-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">Architecture</a>
+                        <a href="/api/docs" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                            API Docs
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div class="relative pt-32 pb-20 sm:pt-40 sm:pb-24 overflow-hidden">
+            <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <div class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium text-indigo-400 bg-indigo-400/10 border border-indigo-400/20 mb-8">
+                    <span>Powered by RabbitMQ & Puppeteer</span>
+                </div>
+                <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white mb-8">
+                    Not Just a Scraper: <br class="hidden sm:block" />
+                    <span class="text-indigo-400">The Ultimate AI Content Generator</span>
+                </h1>
+                <p class="mt-4 max-w-2xl mx-auto text-xl text-slate-400 mb-10">
+                    A robust, type-safe API service to automate article and image generation using AI. Built for scalability with an event-driven queue system.
+                </p>
+                <div class="flex justify-center gap-4 flex-col sm:flex-row">
+                    <a href="/api/docs" class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg transition-all shadow-lg shadow-indigo-500/20">
+                        Read the Docs
+                    </a>
+                    <a href="#architecture" class="inline-flex items-center justify-center px-8 py-3 border border-slate-700 text-base font-medium rounded-md text-slate-300 bg-slate-800 hover:bg-slate-700 md:py-4 md:text-lg transition-all">
+                        View Architecture
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div id="features" class="py-24 bg-slate-800/50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-base text-indigo-400 font-semibold tracking-wide uppercase">Tech Stack</h2>
+                    <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-white sm:text-4xl">
+                        Engineered for Performance
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-slate-900 p-8 rounded-2xl border border-slate-800 hover:border-indigo-500/50 transition-colors group">
+                        <div class="h-12 w-12 bg-indigo-500/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-indigo-500/20 transition-colors">
+                            <svg class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">Queue System</h3>
+                        <p class="text-slate-400">Leverages <strong>RabbitMQ</strong> to decouple API requests from heavy scraping tasks. This ensures the server remains non-blocking and scalable under load.</p>
+                    </div>
+
+                    <div class="bg-slate-900 p-8 rounded-2xl border border-slate-800 hover:border-indigo-500/50 transition-colors group">
+                        <div class="h-12 w-12 bg-indigo-500/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-indigo-500/20 transition-colors">
+                            <svg class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">Type-Safe & Validated</h3>
+                        <p class="text-slate-400">Built with <strong>Node.js & TypeScript</strong>. All inputs are strictly validated using <strong>Zod</strong>, which auto-generates our OpenAPI/Swagger documentation.</p>
+                    </div>
+
+                    <div class="bg-slate-900 p-8 rounded-2xl border border-slate-800 hover:border-indigo-500/50 transition-colors group">
+                        <div class="h-12 w-12 bg-indigo-500/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-indigo-500/20 transition-colors">
+                            <svg class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">Custom Infra & CDN</h3>
+                        <p class="text-slate-400">Hosted on VPS with Nginx Reverse Proxy. Includes a custom <strong>CDN</strong> for serving generated images and automated cleanup schedulers.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="architecture" class="py-24">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="lg:grid lg:grid-cols-2 lg:gap-16 items-start">
+                    <div>
+                        <h2 class="text-3xl font-extrabold text-white sm:text-4xl mb-6">
+                            Intelligent Automation
+                        </h2>
+                        <p class="text-lg text-slate-400 mb-8">
+                            We don't just scrape; we manage the entire lifecycle of content generation. From session injection to asset hosting.
+                        </p>
+                        <div class="space-y-6">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <div class="flex items-center justify-center h-8 w-8 rounded-md bg-indigo-500/10 text-indigo-400">
+                                        1
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="text-lg font-medium text-white">Multi-Provider Support</h4>
+                                    <p class="mt-2 text-slate-400">Seamlessly switch between AI models for article generation using Puppeteer Core.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <div class="flex items-center justify-center h-8 w-8 rounded-md bg-indigo-500/10 text-indigo-400">
+                                        2
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="text-lg font-medium text-white">Automated Maintenance</h4>
+                                    <p class="mt-2 text-slate-400">Bash scripts and Cronjobs automatically clean up temporary files and sessions to keep the infrastructure healthy.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <div class="flex items-center justify-center h-8 w-8 rounded-md bg-indigo-500/10 text-indigo-400">
+                                        3
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="text-lg font-medium text-white">Browser Session Injection</h4>
+                                    <p class="mt-2 text-slate-400">Advanced session management to bypass login screens and maintain context across requests.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-10 lg:mt-0 bg-slate-950 rounded-xl overflow-hidden border border-slate-800 shadow-2xl">
+                        <div class="flex items-center px-4 py-3 bg-slate-900 border-b border-slate-800">
+                            <div class="flex space-x-2">
+                                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            </div>
+                            <div class="ml-4 text-xs text-slate-500 font-mono">job_queue_example.ts</div>
+                        </div>
+                        <div class="p-6 overflow-x-auto">
+<pre class="font-mono text-sm text-indigo-300">
+<span class="text-slate-500">// POST /api/article/generate</span>
+const <span class="text-white">response</span> = <span class="text-purple-400">await</span> fetch(<span class="text-green-400">'https://scraper.misbakhul.my.id/api/article/generate'</span>, {
+    method: <span class="text-green-400">'POST'</span>,
+    headers: {
+        <span class="text-green-400">'Content-Type'</span>: <span class="text-green-400">'application/json'</span>,
+        <span class="text-green-400">'x-api-key'</span>: <span class="text-green-400">'YOUR_SECURE_KEY'</span>
+    },
+    body: JSON.stringify({
+        topic: <span class="text-green-400">"Pola Pikir Generasi Z"</span>,
+        keywords: [<span class="text-green-400">"Digital Native"</span>, <span class="text-green-400">"Mental Health"</span>],
+        category: <span class="text-green-400">"Sociology"</span>,
+        tone: <span class="text-green-400">"educational"</span>,
+        imageCount: <span class="text-orange-400">3</span>,
+        webhookUrl: <span class="text-green-400">"https://your-callback.com/webhook"</span>,
+        articleData: {
+            id: <span class="text-green-400">"internal_id_123"</span>
+        }
+    })
+});
+
+<span class="text-slate-500">// Server returns 202 Accepted (Queued)</span>
+const <span class="text-white">result</span> = <span class="text-purple-400">await</span> response.json();
+console.log(<span class="text-white">result</span>);
+</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="py-20 border-t border-slate-800 bg-slate-900/50">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-3xl font-extrabold text-white mb-8">Ready to integrate?</h2>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="/api/docs" class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-slate-900 bg-white hover:bg-slate-100 md:py-4 md:text-lg transition-all">
+                        Swagger Documentation
+                    </a>
+                </div>
+                <p class="mt-6 text-sm text-slate-500">
+                    Includes definitions for all endpoints, Zod schemas, and response types.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-slate-900 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center gap-2">
+                <span class="text-slate-500 text-sm">&copy; 2026 AI Scraper Service.</span>
+            </div>
+            <div class="flex space-x-6 mt-4 md:mt-0">
+                <span class="text-slate-600 text-sm">Node.js • TypeScript • RabbitMQ • Puppeteer</span>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

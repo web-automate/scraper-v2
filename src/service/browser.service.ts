@@ -1,10 +1,10 @@
-import puppeteer, { Page, Browser, Protocol, Permission } from 'puppeteer-core';
+import { ChildProcess, spawn } from 'child_process';
 import fs from 'fs';
-import { spawn, ChildProcess } from 'child_process';
 import path from 'path';
-import { SCRAPER_CONFIG } from '../lib/scraper.const';
 import { env } from 'process';
+import puppeteer, { Page, Permission } from 'puppeteer-core';
 import { SessionManager } from '../config/session/manager';
+import { SCRAPER_CONFIG } from '../lib/scraper.const';
 
 const CHROME_PATH = process.platform === 'win32' 
   ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe' 

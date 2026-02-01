@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Allow: /api/docs
+Disallow: /api/*
+Disallow: /private/
+Disallow: /admin/
+
+Sitemap: https://scraper.misbakhul.my.id/sitemap.xml
