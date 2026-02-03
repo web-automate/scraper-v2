@@ -13,6 +13,7 @@ import { authRouter } from './routes/auth/route';
 import { imageRouter } from './routes/image/route';
 import { browserService } from './service/browser.service';
 import { rabbitMQService } from './service/rabbitmq.service';
+import { sessionMonitor } from './service/session-monitor.service';
 import { startWorker } from './worker/scraper.worker';
 
 dotenv.config();
@@ -118,14 +119,13 @@ const startApp = async () => {
     console.log(`\n--- ${env.AI_PROVIDER.toUpperCase()} ---\n`);
     
     console.log('[1/4] 🌐 Launching Browser Service...');
-    // await browserService.launch();
-    // await browserService.initSession(`session-${env.AI_PROVIDER}`);
-    // await browserService.launch();
-    // await browserService.initSession(`session-${env.AI_PROVIDER}`);
+    await browserService.launch();
+    await browserService.initSession(`session-${env.AI_PROVIDER}`);
+    await browserService.launch();
+    await browserService.initSession(`session-${env.AI_PROVIDER}`);
     console.log('      ✅ Browser Ready');
 
-    // sessionMonitor.start();
-    // sessionMonitor.start();
+    sessionMonitor.start();
 
     console.log('[2/4] 🐰 Connecting to RabbitMQ...');
     try {
