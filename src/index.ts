@@ -13,6 +13,7 @@ import { authRouter } from './routes/auth/route';
 import { imageRouter } from './routes/image/route';
 import { browserService } from './service/browser.service';
 import { rabbitMQService } from './service/rabbitmq.service';
+import { sessionMonitor } from './service/session-monitor.service';
 import { startWorker } from './worker/scraper.worker';
 
 dotenv.config();
@@ -90,6 +91,9 @@ app.get('/og-image.png', (req: Request, res: Response) => {
 app.get('/css/style.css', (req: Request, res: Response) => {
   res.sendFile(path.join(process.cwd(), 'src/lib/html/assets/css/style.css'));
 });
+app.get('/css/style.css', (req: Request, res: Response) => {
+  res.sendFile(path.join(process.cwd(), 'src/lib/html/assets/css/style.css'));
+});
 
 app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({ 
@@ -99,6 +103,9 @@ app.get('/health', (req: Request, res: Response) => {
   });
 });
 
+app.use('/api/auth', limiter, authRouter);
+app.use('/api/article', limiter, apiKeyAuth, articleRouter);
+app.use('/api/image', limiter, apiKeyAuth, imageRouter);
 app.use('/api/auth', limiter, authRouter);
 app.use('/api/article', limiter, apiKeyAuth, articleRouter);
 app.use('/api/image', limiter, apiKeyAuth, imageRouter);
@@ -118,14 +125,13 @@ const startApp = async () => {
     console.log(`\n--- ${env.AI_PROVIDER.toUpperCase()} ---\n`);
     
     console.log('[1/4] 🌐 Launching Browser Service...');
-    // await browserService.launch();
-    // await browserService.initSession(`session-${env.AI_PROVIDER}`);
-    // await browserService.launch();
-    // await browserService.initSession(`session-${env.AI_PROVIDER}`);
+    await browserService.launch();
+    await browserService.initSession(`session-${env.AI_PROVIDER}`);
+    await browserService.launch();
+    await browserService.initSession(`session-${env.AI_PROVIDER}`);
     console.log('      ✅ Browser Ready');
 
-    // sessionMonitor.start();
-    // sessionMonitor.start();
+    sessionMonitor.start();
 
     console.log('[2/4] 🐰 Connecting to RabbitMQ...');
     try {

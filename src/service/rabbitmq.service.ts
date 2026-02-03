@@ -8,19 +8,23 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export class RabbitMQService {
   private connection: Connection | null = null;
   private channel: Channel | null = null;
+  private isReconnecting = false;
 
   async connect() {
+    if (this.isReconnecting) return;
     try {
       console.log('🔌 Connecting to RabbitMQ...');
       this.connection = await amqp.connect(RABBITMQ_URL) as unknown as amqp.Connection;
       
       this.connection.on('error', (err: unknown) => {
         console.error('❌ RabbitMQ connection error:', err instanceof Error ? err.message : String(err));
+        this.handleReconnect();
       });
 
       this.connection.on('close', () => {
         console.warn('⚠️ RabbitMQ connection closed');
         this.channel = null;
+        this.handleReconnect();
       });
 
       this.channel = await (this.connection as any).createChannel() as amqp.ConfirmChannel;
@@ -36,8 +40,20 @@ export class RabbitMQService {
       console.log('Connected to RabbitMQ');
     } catch (error) {
       console.error('Failed to connect to RabbitMQ:', error);
-      process.exit(1);
+      this.handleReconnect();
     }
+  }
+
+  private async handleReconnect() {
+    if (this.isReconnecting) return;
+
+    this.isReconnecting = true;
+    this.channel = null;
+    this.connection = null;
+
+    console.log('🔄 Attempting to reconnect in 5 seconds...');
+    await sleep(5000);
+    await this.connect();
   }
 
   async publishToQueue(data: any) {
