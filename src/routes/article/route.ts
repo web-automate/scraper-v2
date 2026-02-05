@@ -1,4 +1,5 @@
 import { Request, Response, Router } from 'express';
+import { queueNames } from '../../lib/constants/queue-name';
 import { GenerateStatus } from '../../lib/enum/status-response';
 import { ArticleRequest, publicArticleSchema, SuccessArticleResponse } from '../../lib/schema/article';
 import { rabbitMQService } from '../../service/rabbitmq.service';
@@ -24,7 +25,7 @@ articleRouter.post('/generate', async (req: Request, res: Response): Promise<any
   console.log(`[Route] Received Article Request: ${JSON.stringify(payload)}`);
 
   try {
-    await rabbitMQService.publishToQueue(payload);
+    await rabbitMQService.publishToQueue(queueNames.articleGenerator, payload);
 
     const data: SuccessArticleResponse = {
       success: true,

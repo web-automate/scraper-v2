@@ -1,3 +1,4 @@
+import { EditImageQueuePayload } from "../../worker/types";
 import { getAspectRatioInstruction } from "../enum/aspect-ratio";
 import { ArticleRequest } from "../schema/article";
 import { ImageRequest } from "../schema/image";
@@ -47,4 +48,29 @@ export const promptImage = (imgData: ImageRequest, toneGuideline: string) => `
 
         [SYNTHESIS INSTRUCTIONS]
         Combine the subject content with the artistic tone and composition guidelines seamlessly.
+        `.trim();
+
+export const promptEditImage = (imgData: EditImageQueuePayload, toneGuideline: string) => `
+        Image Editing & Transformation Prompt
+        -------------------------------------
+
+        [INPUT CONTEXT]
+        A reference image has been provided. Your task is to modify, transform, or restyle this specific input image based strictly on the instructions below. Do not generate a random image from scratch; anchor your generation to the visual structure of the provided image.
+
+        [USER EDITING INSTRUCTION]
+        ${imgData.prompt.trim()}
+        (Directly apply this instruction to the provided image. If this describes a subject, ensure the result matches the description while respecting the input image's composition.)
+
+        [ARTISTIC STYLE & TONE APPLICATION]
+        ${toneGuideline.trim()}
+        (Apply this aesthetic style to the final result.)
+
+        [COMPOSITION & FORMATTING]
+        Target Aspect Ratio: ${imgData.aspectRatio || 'Maintain Original'}
+        Framing Guideline: ${imgData.aspectRatio ? getAspectRatioInstruction(imgData.aspectRatio) : 'Preserve the original framing and composition.'}
+
+        [EXECUTION CONSTRAINTS]
+        1. REFERENCE PRIORITY: Use the provided image as the primary source of truth for composition and subject placement unless strictly told to move/remove them.
+        2. NO COLLAGES: Generate exactly ONE single cohesive image. Do NOT create grids, split-screens, or "before and after" comparisons.
+        3. SEAMLESS BLEND: Ensure the edited elements blend naturally with the unaffected parts of the image (lighting, shadows, and texture consistency).
         `.trim();

@@ -4,18 +4,22 @@
   "description": "scraper to gemini",
   "main": "src/index.ts",
   "scripts": {
-    "test": "dotenv ts-node src/index.ts",
-    "dev": "nodemon",
-    "build": "pnpm swagger && tsc",
+    "test": "dotenv tsx src/index.ts",
+    "dev": "nodemon --exec tsx src/index.ts",
+    "build": "tsc",
     "build:css": "npx @tailwindcss/cli -i ./src/lib/html/assets/css/input.css -o ./src/lib/html/assets/css/style.css --minify",
     "start": "dotenv node dist/index.js",
-    "swagger": "ts-node src/config/swagger-gen.ts",
-    "session": "dotenv ts-node src/config/prepare_session.ts"
+    "swagger": "tsx src/config/swagger-gen.ts",
+    "session": "dotenv tsx src/config/prepare_session.ts",
+    "type-check": "tsc --noEmit",
+    "postinstall": "pnpm swagger && pnpm build:css"
   },
   "author": "misbakhul munir",
   "license": "ISC",
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.4.0",
+    "@aws-sdk/client-s3": "^3.983.0",
+    "@aws-sdk/s3-request-presigner": "^3.983.0",
     "@tailwindcss/cli": "^4.1.18",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/jsonwebtoken": "^9.0.10",
@@ -25,9 +29,11 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "form-data": "^4.0.5",
     "fs-extra": "^11.3.3",
     "glob": "^13.0.0",
     "jsonwebtoken": "^9.0.3",
+    "multer": "^2.0.2",
     "node-cron": "^4.2.1",
     "postcss": "^8.5.6",
     "puppeteer": "^24.35.0",
@@ -46,6 +52,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/fs-extra": "^11.0.4",
+    "@types/multer": "^2.0.0",
     "@types/node": "^25.0.10",
     "@types/node-cron": "^3.0.11",
     "@types/swagger-jsdoc": "^6.0.4",
@@ -54,6 +61,7 @@
     "dotenv-cli": "^11.0.0",
     "nodemon": "^3.1.11",
     "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
 }

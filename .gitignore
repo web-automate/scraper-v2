@@ -13,3 +13,5 @@ data/sessions/session-gemini.json
 ./session-gemini.json
 content/images/*.png
 content/images/*.webp
+content/images/**/*.png
+content/images/**/*.webp
