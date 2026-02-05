@@ -92,9 +92,6 @@ app.get('/og-image.png', (req: Request, res: Response) => {
 app.get('/css/style.css', (req: Request, res: Response) => {
   res.sendFile(path.join(process.cwd(), 'src/lib/html/assets/css/style.css'));
 });
-app.get('/css/style.css', (req: Request, res: Response) => {
-  res.sendFile(path.join(process.cwd(), 'src/lib/html/assets/css/style.css'));
-});
 
 app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({ 
