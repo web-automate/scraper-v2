@@ -18,6 +18,20 @@ export const clay3d = 'create a charming 3D illustration style resembling digita
 
 export const vintageFilm = 'create a vintage analog photography aesthetic, specifically mimicking 35mm film with natural grain and imperfect color shifts. If people are present, preserve their identity while capturing them with a soft focus, warm, slightly muted color tones, and natural light leaks or lens flares. Otherwise, treat the scene or object with the same nostalgic filter, emphasizing texture and film artifacts. The overall mood should feel candid, nostalgic, and warm, like a rediscovered memory from the 1970s.';
 
+export const realisticPhoto = 'create a hyper-realistic, 8k high-resolution photograph. If people are present, preserve their identity strictly while capturing minute skin textures, realistic hair strands, and lifelike eye reflections under balanced, studio-quality lighting. Otherwise, treat the scene or object with macro-level detail and physics-based lighting accuracy. Use a standard 50mm lens perspective with a slight depth of field to separate the subject from a realistic background, ensuring the image looks like a high-end stock photo without artistic stylization.';
+
+export const graphicDesign = 'create a modern commercial graphic design aesthetic suitable for banners or pamphlets. If people are present, preserve their identity while integrating them into a clean composition with smooth masking and professional lighting. Otherwise, treat the scene or object as the hero element of an advertisement. Use a sophisticated layout with ample negative space, bold geometric accents, and a vibrant, marketing-ready color palette. The style should feel digital, vector-sharp, and ready for print or web display.';
+
+export const cinematic = 'create a widescreen cinematic shot reminiscent of a high-budget hollywood movie. If people are present, preserve their identity while using dramatic key lighting, rim lighting to separate them from the background, and an intense or contemplative expression. Otherwise, treat the scene or object as a pivotal plot device. Use an anamorphic lens aesthetic with horizontal lens flares, a teal-and-orange color grade, and a shallow depth of field to emphasize the focal point, creating a mood that is epic and narrative-driven.';
+
+export const eventPhoto = 'create a polished professional event photography aesthetic, similar to high-end wedding or graduation photos. If people are present, preserve their identity while placing them in a flattering pose with soft, golden-hour lighting and a genuine, celebratory expression. Otherwise, treat the scene or object as a ceremonial detail. Use a wide aperture to create a creamy bokeh background, ensuring colors are warm, vibrant, and airy, evoking feelings of joy, success, and elegance.';
+
+export const pixelArt = 'create a retro 16-bit pixel art aesthetic reminiscent of 90s SNES adventure games. If people are present, preserve their identity while translating them into recognizable pixel sprites with limited color palettes and distinct shading. Otherwise, treat the scene or object as a game asset or environment tile. Ensure all lines and shapes are constructed from a visible pixel grid without anti-aliasing, using bright, nostalgic colors to create a playful and digital atmosphere.';
+
+export const oilPainting = 'create a classic impressionist oil painting aesthetic with visible brushstrokes and rich texture. If people are present, preserve their identity while rendering them with layered paint applications, focusing on light and shadow rather than sharp details. Otherwise, treat the scene or object as a still life study. Use a traditional color palette with blended edges and a canvas texture finish, creating a mood that feels timeless, artistic, and museum-quality.';
+
+export const isometric3d = 'create a clean, isometric 3D render style often used in tech startups and app visualizations. If people are present, preserve their identity while stylizing them as high-fidelity 3D avatars with smooth skin and floating posture. Otherwise, treat the scene or object as a floating element on a clean, solid-colored background. Use soft, global illumination, rounded corners, and matte materials with soft reflections to create a look that is modern, organized, and digital.';
+
 export const ToneImagePrompts = {
   artSchool,
   doodle,
@@ -28,7 +42,14 @@ export const ToneImagePrompts = {
   corporateFlat,
   manga,
   clay3d,
-  vintageFilm
+  vintageFilm,
+  realisticPhoto,
+  graphicDesign,
+  cinematic,
+  eventPhoto,
+  pixelArt,
+  oilPainting,
+  isometric3d
 } as const;
 
 export enum ToneImageEnum {
@@ -41,7 +62,14 @@ export enum ToneImageEnum {
   corporateFlat = 'corporateFlat',
   manga = 'manga',
   clay3d = 'clay3d',
-  vintageFilm = 'vintageFilm'
+  vintageFilm = 'vintageFilm',
+  realisticPhoto = 'realisticPhoto',
+  graphicDesign = 'graphicDesign',
+  cinematic = 'cinematic',
+  eventPhoto = 'eventPhoto',
+  pixelArt = 'pixelArt',
+  oilPainting = 'oilPainting',
+  isometric3d = 'isometric3d'
 }
 
 export type ToneImage = keyof typeof ToneImagePrompts;

@@ -1,10 +1,11 @@
 import { OpenApiGeneratorV3 } from '@asteasolutions/zod-to-openapi';
-import { registry } from '../lib/openapi.registry';
 import * as fs from 'fs';
-import * as path from 'path';
 import { glob } from 'glob';
-import { env } from './env';
+import * as path from 'path';
+import { pathToFileURL } from 'url';
 import { production } from '../lib/node-env';
+import { registry } from '../lib/openapi.registry';
+import { env } from './env';
 
 async function generateOpenAPI() {
   console.log('🔍 Scanning for OpenAPI definitions...');
@@ -23,7 +24,8 @@ async function generateOpenAPI() {
   }
 
   for (const filePath of routeFiles) {
-    await import(filePath); 
+    const fileUrl = pathToFileURL(filePath).href;
+    await import(fileUrl); 
     console.log(`   - Loaded: ${path.relative(process.cwd(), filePath)}`); 
   }
 

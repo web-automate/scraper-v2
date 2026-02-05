@@ -1,17 +1,41 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import { ElementHandle, Page } from 'puppeteer-core';
+import { v4 as uuidv4 } from 'uuid';
+import { ImageHelper } from '../helper/img-converter';
 import { SCRAPER_CONFIG } from '../lib/scraper.const';
 import { browserService, TEMP_DOWNLOAD_DIR } from './browser.service';
-import path from 'node:path';
-import * as fs from 'fs';
-import { v4 as uuidv4 } from 'uuid';
-import { env } from '../config/env';
-import { ImageHelper } from '../helper/img-converter';
 
 export class AiScraperService {
+  private readonly repoRoot: string;
+  private readonly finalDir: string;
+  private readonly editImageDir: string;
+
+  constructor() {
+    this.repoRoot = process.cwd();
+
+    this.finalDir = process.env.NODE_ENV === 'production'
+      ? '/var/www/scraper-v2/content/images'
+      : path.join(this.repoRoot, 'content', 'images');
+
+    this.editImageDir = path.join(this.finalDir, 'edit');
+
+    if (!fs.existsSync(TEMP_DOWNLOAD_DIR)) {
+      fs.mkdirSync(TEMP_DOWNLOAD_DIR, { recursive: true });
+    }
+
+    if (!fs.existsSync(this.finalDir)) {
+      fs.mkdirSync(this.finalDir, { recursive: true });
+    }
+
+    if (!fs.existsSync(this.editImageDir)) {
+      fs.mkdirSync(this.editImageDir, { recursive: true });
+    }
+  }
 
   public async generateContent(prompt: string): Promise<string> {
     console.log('[AiScraper] Starting content generation task...');
-    
+
     try {
       const page = await this.setupChatSession(prompt);
 
@@ -23,18 +47,18 @@ export class AiScraperService {
 
       console.log('[AiScraper] Response ready. Finding copy button...');
       await this.waitForCopyButton(page);
-      
+
       const copyButtons = await page.$$(SCRAPER_CONFIG.COPY_BTN_SELECTOR);
       const lastCopyBtn = copyButtons[copyButtons.length - 1];
 
       if (!lastCopyBtn) throw new Error('Copy button not found');
-      
+
       await lastCopyBtn.click();
       await new Promise(r => setTimeout(r, 1000));
 
       const clipboardText = await page.evaluate(() => navigator.clipboard.readText());
       console.log('[AiScraper] Content retrieved successfully.');
-      
+
       return clipboardText;
 
     } catch (error) {
@@ -46,22 +70,19 @@ export class AiScraperService {
   public async generateImage(prompt: string, webpFormat?: boolean, imageMaxSizeKB?: number): Promise<string> {
     console.log('[AiScraper] Starting IMAGE generation task...');
 
-    const repoRoot = process.cwd();
-    const finalDir = process.env.NODE_ENV === 'production' 
-      ? '/var/www/scraper-v2/content/images'
-      : path.join(process.cwd(), 'content', 'images');
 
-    if (!fs.existsSync(finalDir)) fs.mkdirSync(finalDir, { recursive: true });
+
+    if (!fs.existsSync(this.finalDir)) fs.mkdirSync(this.finalDir, { recursive: true });
 
     try {
       const page = await this.setupChatSession(prompt, true);
 
       console.log('[AiScraper] Waiting for image generation...');
-      
+
       try {
         await page.waitForSelector(SCRAPER_CONFIG.DOWNLOAD_BTN_SELECTOR, {
           visible: true,
-          timeout: 60000 
+          timeout: 60000
         });
       } catch (timeoutError) {
         await this.checkContentViolation(page);
@@ -70,12 +91,12 @@ export class AiScraperService {
 
       console.log('[AiScraper] Image generated. Starting download...');
 
-      await new Promise(r => setTimeout(r, 2000)); 
+      await new Promise(r => setTimeout(r, 2000));
       await this.clickElement(page, SCRAPER_CONFIG.DOWNLOAD_BTN_SELECTOR);
-      
-      const finalFilePath = await this.handleDownloadedFile(TEMP_DOWNLOAD_DIR, finalDir, imageMaxSizeKB, webpFormat);
-      
-      const relativePath = path.relative(repoRoot, finalFilePath);
+
+      const finalFilePath = await this.handleDownloadedFile(TEMP_DOWNLOAD_DIR, this.finalDir, imageMaxSizeKB, webpFormat);
+
+      const relativePath = path.relative(this.repoRoot, finalFilePath);
       console.log(`[AiScraper] Image saved: ${relativePath}`);
 
       return relativePath;
@@ -86,9 +107,52 @@ export class AiScraperService {
     }
   }
 
-  private async setupChatSession(prompt: string, isImageMode = false): Promise<Page> {
+  public async generateEditImage(prompt: string, webpFormat?: boolean, imageMaxSizeKB?: number, localFilePath?: string): Promise<string> {
+    console.log('[AiScraper] Starting IMAGE EDIT generation task...');
+
+    if (!fs.existsSync(this.editImageDir)) fs.mkdirSync(this.editImageDir, { recursive: true });
+
+    try {
+      const page = await this.setupChatSession(prompt, true, localFilePath);
+      console.log('[AiScraper] Waiting for image edit generation...');
+
+      if (localFilePath && fs.existsSync(localFilePath)) {
+        try {
+          fs.rmSync(localFilePath, { force: true });
+          console.log(`[Worker] Cleaned up source file: ${localFilePath}`);
+        } catch (e) {
+          console.error(`[Worker] Failed to cleanup source file: ${e}`);
+        }
+      }
+
+      try {
+        await page.waitForSelector(SCRAPER_CONFIG.DOWNLOAD_BTN_SELECTOR, {
+          visible: true,
+          timeout: 5 *60000
+        });
+      } catch (timeoutError) {
+        await this.checkContentViolation(page);
+        throw timeoutError;
+      }
+
+      console.log('[AiScraper] Image edit generated. Starting download...');
+      await new Promise(r => setTimeout(r, 2000));
+      await this.clickElement(page, SCRAPER_CONFIG.DOWNLOAD_BTN_SELECTOR);
+
+      const finalFilePath = await this.handleDownloadedFile(TEMP_DOWNLOAD_DIR, this.editImageDir, imageMaxSizeKB, webpFormat);
+
+      const relativePath = path.relative(this.repoRoot, finalFilePath);
+      console.log(`[AiScraper] Image edit saved: ${relativePath}`);
+      return relativePath;
+    } catch (error) {
+      console.error("[AiScraper] Image edit generation failed:", error);
+      throw error;
+    }
+  }
+
+
+  private async setupChatSession(prompt: string, isImageMode = false, localFilePath?: string): Promise<Page> {
     const page = await browserService.getMainPage();
-    console.log('[AiScraper] Attached to main page.');
 
     if (!page.url().includes(SCRAPER_CONFIG.WEB_URL)) {
       await page.goto(SCRAPER_CONFIG.WEB_URL, { waitUntil: 'networkidle2' });
@@ -117,13 +181,51 @@ export class AiScraperService {
     await page.waitForSelector(editorSelector, { timeout: 10000 });
     await page.focus(editorSelector);
 
-    await page.evaluate((text) => navigator.clipboard.writeText(text), prompt);
     const isMac = process.platform === 'darwin';
     const modifier = isMac ? 'Meta' : 'Control';
+
+    if (localFilePath) {
+      try {
+        const buffer = fs.readFileSync(localFilePath);
+        const base64Image = buffer.toString('base64');
+        const ext = path.extname(localFilePath).toLowerCase().replace('.', '');
+
+        let mimeType = 'image/png';
+        if (ext === 'jpg' || ext === 'jpeg') mimeType = 'image/jpeg';
+        if (ext === 'webp') mimeType = 'image/webp';
+
+        await page.evaluate(async (base64, mime) => {
+          const byteCharacters = atob(base64);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: mime });
+
+          await navigator.clipboard.write([
+            new ClipboardItem({ [mime]: blob })
+          ]);
+        }, base64Image, mimeType);
+
+        await page.keyboard.down(modifier);
+        await page.keyboard.press('V');
+        await page.keyboard.up(modifier);
+
+        await new Promise(r => setTimeout(r, 2000));
+
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    await page.evaluate((text) => navigator.clipboard.writeText(text), prompt);
     await page.keyboard.down(modifier);
     await page.keyboard.press('V');
     await page.keyboard.up(modifier);
     await new Promise(r => setTimeout(r, 800));
+
+    await page.waitForSelector(SCRAPER_CONFIG.SEND_BTN_SELECTOR, { timeout: 30000 });
 
     await page.keyboard.press('Enter');
     return page;
@@ -196,7 +298,7 @@ export class AiScraperService {
 
           if (Date.now() - newestFile.time < 60000) {
             clearInterval(checkInterval);
-            
+
             try {
               const newName = `image-${uuidv4()}.webp`;
               let finalPath = path.join(destDir, newName);

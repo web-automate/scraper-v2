@@ -19,6 +19,7 @@ import { startWorker } from './worker/scraper.worker';
 dotenv.config();
 
 const app = express();
+const HOST = env.NODE_ENV === 'development' ? 'localhost' : env.HOST;
 const PORT = process.env.PORT || 3000;
 const CHROME_DATA_DIR = path.join(process.cwd(), 'chrome_data_prod');
 
@@ -91,9 +92,6 @@ app.get('/og-image.png', (req: Request, res: Response) => {
 app.get('/css/style.css', (req: Request, res: Response) => {
   res.sendFile(path.join(process.cwd(), 'src/lib/html/assets/css/style.css'));
 });
-app.get('/css/style.css', (req: Request, res: Response) => {
-  res.sendFile(path.join(process.cwd(), 'src/lib/html/assets/css/style.css'));
-});
 
 app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({ 
@@ -106,12 +104,7 @@ app.get('/health', (req: Request, res: Response) => {
 app.use('/api/auth', limiter, authRouter);
 app.use('/api/article', limiter, apiKeyAuth, articleRouter);
 app.use('/api/image', limiter, apiKeyAuth, imageRouter);
-app.use('/api/auth', limiter, authRouter);
-app.use('/api/article', limiter, apiKeyAuth, articleRouter);
-app.use('/api/image', limiter, apiKeyAuth, imageRouter);
-app.use('/api/auth', limiter, authRouter);
-app.use('/api/article', limiter, apiKeyAuth, articleRouter);
-app.use('/api/image', limiter, apiKeyAuth, imageRouter);
+
 
 app.use((req: Request, res: Response) => {
   res.status(404).json({ success: false, error: 'Endpoint not found' });
@@ -127,10 +120,7 @@ const startApp = async () => {
     console.log('[1/4] 🌐 Launching Browser Service...');
     await browserService.launch();
     await browserService.initSession(`session-${env.AI_PROVIDER}`);
-    await browserService.launch();
-    await browserService.initSession(`session-${env.AI_PROVIDER}`);
     console.log('      ✅ Browser Ready');
-
     sessionMonitor.start();
 
     console.log('[2/4] 🐰 Connecting to RabbitMQ...');

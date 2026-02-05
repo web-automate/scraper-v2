@@ -54,10 +54,57 @@ export const imageRequestSchema = z.object({
   }).optional().openapi({ description: 'Data tambahan untuk artikel', example: { id: 'article_12345' } }),
 }).openapi('ImageRequest');
 
+export const editImageRequestSchema = z.object({
+  prompt: z.string()
+    .min(3)
+    .openapi({ description: 'Instruksi edit gambar', example: 'Make it rain' }),
+  tone: z.enum(ToneImageEnum)
+    .optional()
+    .default(ToneImageEnum.artSchool)
+    .openapi({ example: 'dramatic' }),
+  aspectRatio: z.enum(AspectRatio)
+    .optional()
+    .default(AspectRatio.LANDSCAPE),
+  webhookUrl: z.string().url()
+    .optional(),
+  webpFormat: z.coerce.boolean()
+    .optional()
+    .default(true),
+  imageMaxSizeKB: z.coerce.number()
+    .optional()
+    .default(100),
+  articleData: z.preprocess(
+    (val) => {
+      if (typeof val === 'string') {
+        if (val.trim() === '') return undefined;
+        try { return JSON.parse(val); } catch { return val; }
+      }
+      return val;
+    },
+    z.object({
+      id: z.string().optional(),
+      imageIndex: z.coerce.number().optional(),
+    }).optional()
+  ).optional(),
+  image: z.any()
+    .refine((file) => !!file, "Image file is required.")
+    .refine((file) => file?.size <= 5 * 1024 * 1024, `Max file size is 5MB.`)
+    .refine(
+      (file) => ["image/jpeg", "image/png", "image/webp"].includes(file?.mimetype),
+      "Only .jpg, .png, .webp formats are supported."
+    )
+    .openapi({
+      type: 'string',
+      format: 'binary',
+      description: 'File gambar input'
+    }),
+}).openapi('EditImageRequest');
+
 export const SuccessImageResponse = z.object({
   success: z.boolean(),
   message: z.string(),
   data: z.object({
+    queue: z.number().int().openapi({ example: 1 }),
     prompt: z.string().openapi({ example: 'Seekor kucing cyberpunk memakai kacamata neon di tengah kota futuristik, realistic style, 8k' }),
     status: z.enum(GenerateStatus),
     webhookUrl: z.string().optional().openapi({ example: 'https://webhook.site/your-unique-id' }),
@@ -76,9 +123,11 @@ export const ImageWebhookResponseSchema = z.object({
 }).openapi('ImageWebhookResponse');
 
 export type ImageRequest = z.infer<typeof imageRequestSchema>;
+export type EditImageRequest = z.infer<typeof editImageRequestSchema>;
 export type SuccessImageResponseType = z.infer<typeof SuccessImageResponse>;
 export type ImageWebhookResponse = z.infer<typeof ImageWebhookResponseSchema>;
 
 registry.register('ImageRequest', imageRequestSchema);
+registry.register('EditImageRequest', editImageRequestSchema);
 registry.register('SuccessImageResponse', SuccessImageResponse);
 registry.register('ImageWebhookResponse', ImageWebhookResponseSchema);

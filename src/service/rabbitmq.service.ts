@@ -1,8 +1,8 @@
 import amqp, { Channel, Connection, ConsumeMessage } from 'amqplib';
 import { env } from '../config/env';
+import { queueNames } from '../lib/constants/queue-name';
 
-const QUEUE_NAME = 'scraping_queue';
-const RABBITMQ_URL = `amqp://${env.RABBITMQ_USER}:${env.RABBITMQ_PASSWORD}@${env.RABBITMQ_HOST}:${env.RABBITMQ_PORT}/`; 
+const RABBITMQ_URL = `amqp://${env.RABBITMQ_USER}:${env.RABBITMQ_PASSWORD}@${env.RABBITMQ_HOST}:${env.RABBITMQ_PORT}/`;
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export class RabbitMQService {
@@ -15,7 +15,7 @@ export class RabbitMQService {
     try {
       console.log('🔌 Connecting to RabbitMQ...');
       this.connection = await amqp.connect(RABBITMQ_URL) as unknown as amqp.Connection;
-      
+
       this.connection.on('error', (err: unknown) => {
         console.error('❌ RabbitMQ connection error:', err instanceof Error ? err.message : String(err));
         this.handleReconnect();
@@ -28,15 +28,19 @@ export class RabbitMQService {
       });
 
       this.channel = await (this.connection as any).createChannel() as amqp.ConfirmChannel;
-      
+
       if (!this.channel) {
         throw new Error('Channel is null');
       }
-      
-      await this.channel.assertQueue(QUEUE_NAME, { durable: true });
-      
+
+      Object.values(queueNames).forEach(queueName => {
+        if (!queueName) throw new Error('Queue name is undefined');
+        if (!this.channel) throw new Error('Channel not initialized');
+        this.channel.assertQueue(queueName, { durable: true });
+      });
+
       await this.channel.prefetch(1);
-      
+
       console.log('Connected to RabbitMQ');
     } catch (error) {
       console.error('Failed to connect to RabbitMQ:', error);
@@ -56,37 +60,47 @@ export class RabbitMQService {
     await this.connect();
   }
 
-  async publishToQueue(data: any) {
+  async publishToQueue(queueName: string, data: any) {
     if (!this.channel) throw new Error('Channel not initialized');
-    
+
     const buffer = Buffer.from(JSON.stringify(data));
-    this.channel.sendToQueue(QUEUE_NAME, buffer, { persistent: true });
+    await this.channel.assertQueue(queueName, { durable: true });
+    this.channel.sendToQueue(queueName, buffer, { persistent: true });
     console.log(`[Producer] Job sent to queue: ${data.type || 'UNKNOWN_TYPE'}`);
   }
 
-  async consume(workerHandler: (data: any) => Promise<void>) {
+  async consume(queueName: string, workerHandler: (data: any) => Promise<void>) {
     if (!this.channel) throw new Error('Channel not initialized');
 
-    this.channel.consume(QUEUE_NAME, async (msg: ConsumeMessage | null) => {
+    if (!queueName) throw new Error('Queue name is undefined');
+    if (!this.channel) throw new Error('Channel not initialized');
+    this.channel.consume(queueName, async (msg: ConsumeMessage | null) => {
       if (msg) {
         try {
           const content = JSON.parse(msg.content.toString());
           console.log(`[Consumer] Processing job...`);
-          
+
           await workerHandler(content);
 
           console.log(`[Consumer] ⏳ Cooling down for 5 seconds...`);
           await sleep(3000);
-          
+
           this.channel?.ack(msg);
           console.log(`[Consumer] Job Done & Acked`);
         } catch (error) {
           console.error(`[Consumer] Job Failed:`, error);
           await sleep(5000);
-          this.channel?.nack(msg, false, true); 
+          this.channel?.nack(msg, false, true);
         }
       }
     });
+
+  }
+
+  async getQueueCount(queueName: string): Promise<number> {
+    if (!this.channel) throw new Error('Channel not initialized');
+    const status = await this.channel.checkQueue(queueName);
+    return status.messageCount;
   }
 }
 
